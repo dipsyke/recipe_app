@@ -6,12 +6,37 @@ import Modal from "./components/Modal.tsx";
 import SignUpPanel from "./components/SignUpPanel.tsx";
 import {User} from "./User.tsx";
 import LoginPanel from "./components/LogInPanel.tsx";
+import {Recipe} from "./Recipe.tsx";
+
 
 function App() {
     const [isSignUpPanelOpen, setIsSignUpPanelOpen] = useState(false)
     const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false)
     const [users, setUsers] = useState<User[] | null>(null)
     const [currentUser, setCurrentUser] = useState<User | null>(null)
+    const [isUserLoggedIn, setIsUserLoggedIn]=useState(false)
+    const [recipes, setRecipes] = useState<Recipe[]>(
+        [
+            {
+                title: "Pancake",
+                servings: 4,
+                ingredients: ["eggs", "milk", "water", "oil", "flour"],
+                instructions: "Make some pancakes."
+            },
+            {
+                title: "Cupcake",
+                servings: 6,
+                ingredients: ["eggs", "milk", "butter", "blueberries", "flour", "vanilla"],
+                instructions: "Make some cupcakes."
+            },
+            {
+                title: "Brownies",
+                servings: 12,
+                ingredients: ["eggs", "banana", "butter","flour", "baking powder"],
+                instructions: "Make some brownies."
+            }
+        ]
+    )
 
     useEffect(() => {
         if (users !== null) {
@@ -42,12 +67,15 @@ function App() {
         }
 
         const matchingUser = users.find((user) => user.userName === username)
-        if(matchingUser===undefined){return false}
-        if(matchingUser.password!==password){
+        if (matchingUser === undefined) {
+            return false
+        }
+        if (matchingUser.password !== password) {
             return false
         }
 
         setCurrentUser(matchingUser)
+        setIsUserLoggedIn(true)
 
         return true
     }
@@ -79,26 +107,30 @@ function App() {
         )
     }
 
-    function openPanel(){
-        if(isSignUpPanelOpen){
+    function openPanel() {
+        if (isSignUpPanelOpen) {
             return <SignUpPanel saveUserData={saveUserData}/>
-        }else if(isLoginPanelOpen){
+        } else if (isLoginPanelOpen) {
             return <LoginPanel tryToLogIn={tryToLogIn}/>
         }
         return <></>
     }
 
+    function closePanels() {
+        setIsLoginPanelOpen(false)
+        setIsSignUpPanelOpen(false)
+    }
+
     return (
         <>
             <p>Logged in user: {currentUser?.userName || 'No one'}</p>
-            <Home onSignUp={() => setIsSignUpPanelOpen(true)} onLogIn={() => setIsLoginPanelOpen(true)}></Home>
-            <Modal onClose={() => setIsSignUpPanelOpen(false)} isOpen={isSignUpPanelOpen || isLoginPanelOpen}>
+            <Home recipes={recipes} isUserLoggedIn={isUserLoggedIn} userName={currentUser?.userName||"no one"} onSignUp={() => setIsSignUpPanelOpen(true)} onLogIn={() => setIsLoginPanelOpen(true)}></Home>
+            {/*<RecipePanel recipes={recipes} />*/}
+            <Modal onClose={closePanels} isOpen={isSignUpPanelOpen || isLoginPanelOpen}>
                 {openPanel()}
             </Modal>
-            <LoginPanel tryToLogIn={tryToLogIn}/>
-            {/*<Modal onClose={()=>setIsLoginModalOpen(false)} isOpen={isLoginModalOpen}>*/}
-            {/*    <LogInPanel />*/}
-            {/*</Modal>*/}
+
+
         </>
     )
 }
