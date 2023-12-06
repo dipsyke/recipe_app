@@ -1,7 +1,10 @@
 import {useState} from "react";
+import Modal from "./Modal.tsx";
 
 interface Props {
     tryToLogIn: (userName: string, password: string) => boolean
+    isOpen: boolean
+    onClose: () => void
 }
 
 export default function LoginPanel(props: Props) {
@@ -18,7 +21,7 @@ export default function LoginPanel(props: Props) {
     }
 
     return (
-        <div>
+        <Modal isOpen={props.isOpen} onClose={props.onClose}>
             <form onSubmit={(e) => {
                 e.preventDefault();
 
@@ -33,6 +36,6 @@ export default function LoginPanel(props: Props) {
 
                 <button onClick={handleLoginClick}>Log In</button>
             </form>
-        </div>
+        </Modal>
     )
 }

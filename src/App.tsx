@@ -2,11 +2,11 @@ import {useEffect, useState} from 'react'
 
 import './App.css'
 import Home from "./components/Home.tsx";
-import Modal from "./components/Modal.tsx";
 import SignUpPanel from "./components/SignUpPanel.tsx";
 import {User} from "./User.tsx";
 import LoginPanel from "./components/LogInPanel.tsx";
 import {Recipe} from "./Recipe.tsx";
+
 
 
 function App() {
@@ -14,7 +14,8 @@ function App() {
     const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false)
     const [users, setUsers] = useState<User[] | null>(null)
     const [currentUser, setCurrentUser] = useState<User | null>(null)
-    const [isUserLoggedIn, setIsUserLoggedIn]=useState(false)
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
+    const [myRecipes, setMyRecipes] = useState<Recipe[] | null>(null)
     const [recipes, setRecipes] = useState<Recipe[]>(
         [
             {
@@ -32,7 +33,7 @@ function App() {
             {
                 title: "Brownies",
                 servings: 12,
-                ingredients: ["eggs", "banana", "butter","flour", "baking powder"],
+                ingredients: ["eggs", "banana", "butter", "flour", "baking powder"],
                 instructions: "Make some brownies."
             }
         ]
@@ -53,6 +54,23 @@ function App() {
             setUsers(JSON.parse(asd))
         }
         console.log(asd)
+    }, [])
+
+    useEffect(() => {
+        if (myRecipes !== null) {
+            console.log("saving my recipes to local storage", myRecipes)
+            localStorage.setItem('myRecipes', JSON.stringify(myRecipes))
+        }
+    }, [myRecipes]);
+
+    useEffect(() => {
+        const serializedRecipes = localStorage.getItem("myRecipes")
+        if (serializedRecipes === null || serializedRecipes === undefined) {
+            setMyRecipes([])
+        } else {
+            setMyRecipes(JSON.parse(serializedRecipes))
+        }
+        console.log(serializedRecipes)
     }, [])
 
     /**
@@ -107,15 +125,6 @@ function App() {
         )
     }
 
-    function openPanel() {
-        if (isSignUpPanelOpen) {
-            return <SignUpPanel saveUserData={saveUserData}/>
-        } else if (isLoginPanelOpen) {
-            return <LoginPanel tryToLogIn={tryToLogIn}/>
-        }
-        return <></>
-    }
-
     function closePanels() {
         setIsLoginPanelOpen(false)
         setIsSignUpPanelOpen(false)
@@ -124,11 +133,11 @@ function App() {
     return (
         <>
             <p>Logged in user: {currentUser?.userName || 'No one'}</p>
-            <Home recipes={recipes} isUserLoggedIn={isUserLoggedIn} userName={currentUser?.userName||"no one"} onSignUp={() => setIsSignUpPanelOpen(true)} onLogIn={() => setIsLoginPanelOpen(true)}></Home>
-            {/*<RecipePanel recipes={recipes} />*/}
-            <Modal onClose={closePanels} isOpen={isSignUpPanelOpen || isLoginPanelOpen}>
-                {openPanel()}
-            </Modal>
+            <Home myRecipes={myRecipes} setMyRecipes={setMyRecipes} recipes={recipes} isUserLoggedIn={isUserLoggedIn} userName={currentUser?.userName || "no one"}
+                  onSignUp={() => setIsSignUpPanelOpen(true)} onLogIn={() => setIsLoginPanelOpen(true)}></Home>
+
+            <SignUpPanel onClose={closePanels} isOpen={isSignUpPanelOpen} saveUserData={saveUserData}></SignUpPanel>
+            <LoginPanel onClose={closePanels} isOpen={isLoginPanelOpen} tryToLogIn={tryToLogIn}></LoginPanel>
 
 
         </>

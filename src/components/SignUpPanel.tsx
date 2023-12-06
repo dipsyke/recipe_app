@@ -1,21 +1,21 @@
-import { useState} from "react";
+import {useState} from "react";
+import Modal from "./Modal.tsx";
 
 
 interface Props {
-   saveUserData: (userName:string, password:string) => void
-
+    saveUserData: (userName: string, password: string) => void
+    isOpen: boolean
+    onClose: () => void
 }
-export default function SignUpPanel(props:Props) {
+
+export default function SignUpPanel(props: Props) {
 
     const [userName, setUserName] = useState<string>("")
     const [password, setPassword] = useState<string>("")
 
 
-
-
-
     return (
-        <div>
+        <Modal isOpen={props.isOpen} onClose={props.onClose}>
             <form onSubmit={(e) => {
                 e.preventDefault();
                 props.saveUserData(userName, password);
@@ -30,6 +30,6 @@ export default function SignUpPanel(props:Props) {
 
                 <button>Sign Up</button>
             </form>
-        </div>
+        </Modal>
     )
 }
