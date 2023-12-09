@@ -14,7 +14,7 @@ export default function LoginPanel(props: Props) {
     function handleLoginClick() {
         const result = props.tryToLogIn(userName, password)
         if (result) {
-            alert('successfully logged in')
+            console.log('successfully logged in')
         } else {
             alert('failed to log in')
         }

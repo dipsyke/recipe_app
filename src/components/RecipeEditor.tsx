@@ -1,13 +1,14 @@
-import { useState} from "react";
+import {useState} from "react";
 import {Recipe} from "../Recipe.tsx";
 import Modal from "./Modal.tsx";
+import {User} from "../User.tsx";
 
 
 interface Props {
     closeEditor: () => void
     isEditorOpen: boolean
-    myRecipes: Recipe[]|null
-    setMyRecipes:  React.Dispatch<React.SetStateAction<Recipe[] | null>>
+    setRecipesOfCurrentUser: (recipes: Recipe[]) => void
+    currentUser: User
 }
 
 export default function RecipeEditor(props: Props) {
@@ -19,28 +20,21 @@ export default function RecipeEditor(props: Props) {
     const [instructions, setInstructions] = useState<string>("")
 
 
-
-
-
     function addToMyRecipeList() {
-        props.setMyRecipes((prevState: Recipe[] | null) => {
-            if (prevState === null) {
-                return null
-            }
-            return [
-                ...prevState,
-                newRecipe
+        const newRecipe: Recipe = {
+            title,
+            servings,
+            ingredients,
+            instructions
+        }
 
-            ]
-        })
+        const recipes = props.currentUser.recipes
+
+        recipes.push(newRecipe)
+
+        props.setRecipesOfCurrentUser(recipes)
+
         props.closeEditor()
-    }
-
-    const newRecipe: Recipe = {
-        title,
-        servings,
-        ingredients,
-        instructions
     }
 
 
@@ -73,7 +67,7 @@ export default function RecipeEditor(props: Props) {
                     return (
                         <>
                             <label key={'label' + index}>{index}</label>
-                            <input key={'input' +index} type="text" value={ingredient}
+                            <input key={'input' + index} type="text" value={ingredient}
                                    onChange={(event) => handleOnChange(event.target.value)}></input>
                         </>
                     )
@@ -85,7 +79,7 @@ export default function RecipeEditor(props: Props) {
                     return newState
                 })}>Add new Ingredient
                 </button>
-<br />
+                <br/>
                 <label>Instructions</label>
                 <input type="text" value={instructions}
                        onChange={(event) => setInstructions(event.target.value)}></input>

@@ -1,28 +1,23 @@
 import RecipePanel from "./RecipePanel.tsx";
 import {Recipe} from "../Recipe.tsx";
 import {useState} from "react";
-import RecipeEditor from "./RecipeEditor.tsx";
+import {User} from "../User.tsx";
 
 
 interface Props {
     onSignUp: () => void
     onLogIn: () => void
-    isUserLoggedIn: boolean
+    currentUser: User | null
     userName: string
-    recipes: Recipe[]
-    myRecipes: Recipe[]|null
-    setMyRecipes:  React.Dispatch<React.SetStateAction<Recipe[] | null>>
+    publicRecipes: Recipe[]
 }
 
 
 export default function Home(props: Props) {
     const [isRecipeListShowing, setIsRecipeListShowing] = useState<boolean>(false)
-    const [isRecipeEditorOpen, setIsRecipeEditorOpen] = useState<boolean>(false)
 
 
-
-
-    if (props.isUserLoggedIn) {
+    if (props.currentUser) {
         return (
             <div className="home">
                 <div>
@@ -30,35 +25,29 @@ export default function Home(props: Props) {
                     <hr/>
                     <br/>
                     <div className="menu">
-                        <button onClick={()=>setIsRecipeListShowing(true)}><h2>Brows all recipes</h2></button>
-                        <button onClick={()=> setIsRecipeEditorOpen(true)}>Add new recipe</button>
+                        <button onClick={() => setIsRecipeListShowing(true)}><h2>Brows all recipes</h2></button>
                         <button>Log out</button>
                     </div>
                     {isRecipeListShowing && (
-                        <RecipePanel recipes={props.recipes}></RecipePanel>
-                    )}
-                    {isRecipeEditorOpen && (
-                        <RecipeEditor myRecipes={props.myRecipes} setMyRecipes={props.setMyRecipes} closeEditor={()=>setIsRecipeEditorOpen(false)} isEditorOpen={isRecipeEditorOpen}></RecipeEditor>
+                        <RecipePanel currentUser={props.currentUser} publicRecipes={props.publicRecipes}></RecipePanel>
                     )}
                 </div>
             </div>
         )
     }
 
-    if (!props.isUserLoggedIn) {
-        return (
-            <div className="home">
-                <div>
-                    <div className="buttonBox">
-                        <button onClick={props.onSignUp}>Sign up</button>
-                        <button onClick={props.onLogIn}>Log in</button>
-                    </div>
-                    <h1>Someone cooked here</h1>
-                    <hr/>
-                    <h2>Brows our recipes</h2>
-                    <RecipePanel recipes={props.recipes}/>
+    return (
+        <div className="home">
+            <div>
+                <div className="buttonBox">
+                    <button onClick={props.onSignUp}>Sign up</button>
+                    <button onClick={props.onLogIn}>Log in</button>
                 </div>
+                <h1>Someone cooked here</h1>
+                <hr/>
+                <h2>Brows our recipes</h2>
+                <RecipePanel currentUser={props.currentUser} publicRecipes={props.publicRecipes}/>
             </div>
-        )
-    }
+        </div>
+    )
 }

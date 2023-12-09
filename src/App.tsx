@@ -6,38 +6,40 @@ import SignUpPanel from "./components/SignUpPanel.tsx";
 import {User} from "./User.tsx";
 import LoginPanel from "./components/LogInPanel.tsx";
 import {Recipe} from "./Recipe.tsx";
+import RecipeEditor from "./components/RecipeEditor.tsx";
 
-
+const publicRecipes = [
+    {
+        title: "Pancake",
+        servings: 4,
+        ingredients: ["eggs", "milk", "water", "oil", "flour"],
+        instructions: "Make some pancakes."
+    },
+    {
+        title: "Cupcake",
+        servings: 6,
+        ingredients: ["eggs", "milk", "butter", "blueberries", "flour", "vanilla"],
+        instructions: "Make some cupcakes."
+    },
+    {
+        title: "Brownies",
+        servings: 12,
+        ingredients: ["eggs", "banana", "butter", "flour", "baking powder"],
+        instructions: "Make some brownies."
+    }
+]
 
 function App() {
     const [isSignUpPanelOpen, setIsSignUpPanelOpen] = useState(false)
     const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false)
+    const [isRecipeEditorOpen, setIsRecipeEditorOpen] = useState<boolean>(false)
+
     const [users, setUsers] = useState<User[] | null>(null)
-    const [currentUser, setCurrentUser] = useState<User | null>(null)
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false)
-    const [myRecipes, setMyRecipes] = useState<Recipe[] | null>(null)
-    const [recipes, setRecipes] = useState<Recipe[]>(
-        [
-            {
-                title: "Pancake",
-                servings: 4,
-                ingredients: ["eggs", "milk", "water", "oil", "flour"],
-                instructions: "Make some pancakes."
-            },
-            {
-                title: "Cupcake",
-                servings: 6,
-                ingredients: ["eggs", "milk", "butter", "blueberries", "flour", "vanilla"],
-                instructions: "Make some cupcakes."
-            },
-            {
-                title: "Brownies",
-                servings: 12,
-                ingredients: ["eggs", "banana", "butter", "flour", "baking powder"],
-                instructions: "Make some brownies."
-            }
-        ]
-    )
+    const [currentUserName, setCurrentUserName] = useState<string | null>(null)
+
+
+    const currentUser = users?.find(user => user.userName === currentUserName) || null
+
 
     useEffect(() => {
         if (users !== null) {
@@ -56,22 +58,6 @@ function App() {
         console.log(asd)
     }, [])
 
-    useEffect(() => {
-        if (myRecipes !== null) {
-            console.log("saving my recipes to local storage", myRecipes)
-            localStorage.setItem('myRecipes', JSON.stringify(myRecipes))
-        }
-    }, [myRecipes]);
-
-    useEffect(() => {
-        const serializedRecipes = localStorage.getItem("myRecipes")
-        if (serializedRecipes === null || serializedRecipes === undefined) {
-            setMyRecipes([])
-        } else {
-            setMyRecipes(JSON.parse(serializedRecipes))
-        }
-        console.log(serializedRecipes)
-    }, [])
 
     /**
      * Logs in user with username if password is correct
@@ -92,8 +78,7 @@ function App() {
             return false
         }
 
-        setCurrentUser(matchingUser)
-        setIsUserLoggedIn(true)
+        setCurrentUserName(matchingUser.userName)
 
         return true
     }
@@ -110,7 +95,8 @@ function App() {
 
         const newUser: User = {
             userName,
-            password
+            password,
+            recipes: []
         }
 
         setUsers((prevState) => {
@@ -125,23 +111,66 @@ function App() {
         )
     }
 
+    function setRecipesOfCurrentUser(recipes: Recipe[]) {
+        if (!currentUserName) {
+            alert('No user is logged in')
+            return
+        }
+
+        setUsers((prevUsers) => {
+            if (!prevUsers) {
+                alert('User not yet loaded')
+                return prevUsers
+            }
+
+            const newUsers = [...prevUsers]
+
+            const userToSetRecipesOf = newUsers.find(user => user.userName === currentUserName)
+            if (!userToSetRecipesOf) {
+                alert('User not found')
+                return newUsers
+            }
+
+            userToSetRecipesOf.recipes = recipes
+
+            return newUsers
+        })
+    }
+
     function closePanels() {
         setIsLoginPanelOpen(false)
         setIsSignUpPanelOpen(false)
     }
 
+
     return (
         <>
             <p>Logged in user: {currentUser?.userName || 'No one'}</p>
-            <Home myRecipes={myRecipes} setMyRecipes={setMyRecipes} recipes={recipes} isUserLoggedIn={isUserLoggedIn} userName={currentUser?.userName || "no one"}
-                  onSignUp={() => setIsSignUpPanelOpen(true)} onLogIn={() => setIsLoginPanelOpen(true)}></Home>
+            <Home
+                publicRecipes={publicRecipes}
+                currentUser={currentUser}
+                userName={currentUser?.userName || "no one"}
+                onSignUp={() => setIsSignUpPanelOpen(true)} onLogIn={() => setIsLoginPanelOpen(true)}
+            ></Home>
 
+            {currentUser && (
+                <>
+                    <button onClick={() => setIsRecipeEditorOpen(true)}>Add new recipe</button>
+
+                    {isRecipeEditorOpen && (
+                        <RecipeEditor
+                            currentUser={currentUser}
+                            setRecipesOfCurrentUser={setRecipesOfCurrentUser}
+                            closeEditor={() => setIsRecipeEditorOpen(false)}
+                            isEditorOpen={isRecipeEditorOpen}
+                        />
+                    )}
+
+                </>
+            )}
             <SignUpPanel onClose={closePanels} isOpen={isSignUpPanelOpen} saveUserData={saveUserData}></SignUpPanel>
             <LoginPanel onClose={closePanels} isOpen={isLoginPanelOpen} tryToLogIn={tryToLogIn}></LoginPanel>
-
-
         </>
     )
 }
-
-export default App
+        export default App
